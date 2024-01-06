@@ -2,4 +2,4 @@
 .env
 
 #config Secrets
-config\config.js
+config/config.js
