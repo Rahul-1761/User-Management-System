@@ -50,4 +50,6 @@ user_route.get('/register',userController.loadRegister);
 
 user_route.post('/register',upload.single('image'), userController.insertUser); /* .single('image'): This method specifies that the route expects a single file upload with the field name 'image'. The string 'image' here corresponds to the name attribute of the HTML form input that will be used to upload the file. For example, if you have an HTML form like this:*/
 
+user_route.get('/verify', userController.verifyMail);
+
 module.exports = user_route;
