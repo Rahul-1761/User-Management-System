@@ -1,2 +1,5 @@
 #Secret
 .env
+
+#config Secrets
+config\config.js

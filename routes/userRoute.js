@@ -1,5 +1,12 @@
 const express = require("express");
 const user_route = express();
+const session = require("express-session");
+
+const config = require('../config/config');
+
+user_route.use(session({secret:config.SESSIONSECRET}));
+
+const auth = require("../middleware/auth");
 
 user_route.set('view engine', 'ejs');
 user_route.set('views', './views/users');
@@ -46,10 +53,17 @@ const upload = multer({storage:fileStorage});
 
 const userController = require('../controllers/userController');
 
-user_route.get('/register',userController.loadRegister);
+user_route.get('/register',auth.isLogout,userController.loadRegister);
 
 user_route.post('/register',upload.single('image'), userController.insertUser); /* .single('image'): This method specifies that the route expects a single file upload with the field name 'image'. The string 'image' here corresponds to the name attribute of the HTML form input that will be used to upload the file. For example, if you have an HTML form like this:*/
 
 user_route.get('/verify', userController.verifyMail);
+
+user_route.get('/', auth.isLogout, userController.loginLoad);
+user_route.get('/login', auth.isLogout, userController.loginLoad);
+
+user_route.post('/login', userController.verifyLogin);
+
+user_route.get('/home', auth.isLogin, userController.loadHome);
 
 module.exports = user_route;

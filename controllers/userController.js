@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const nodemailer = require("nodemailer");
+const userModel = require('../models/userModel');
 require("dotenv").config();
 
 
@@ -103,8 +104,68 @@ const verifyMail = async(req, res)=>{
     }
 }
 
+//login user Method started
+
+const loginLoad = async(req, res)=>{
+    try {
+        
+        res.render('login');
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+
+const verifyLogin = async(req,res)=>{
+    try{
+
+        const email = req.body.email;
+        const password = req.body.password;
+
+        const userData = await User.findOne({email:email});
+
+        if(userData){
+
+            const passwordMatch = await bcrypt.compare(password, userData.password);
+            if(passwordMatch){
+                if(userData.is_varified === 0){
+                    res.render('login', {message: "please Verify your mail."});
+                }
+                else{
+                    req.session.user_id = userData._id;
+                    res.redirect('/home');
+                }
+            }
+            else{
+                res.render('login', {message: "Email and password is incorrect"});
+            }
+        }
+        else{
+            res.render('login', {message: "Email and password is incorrect"});
+        }
+
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+const loadHome = async(req,res)=>{
+    try {
+        
+        res.render('home');
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+
 module.exports = {
     loadRegister,
     insertUser,
-    verifyMail
+    verifyMail,
+    loginLoad,
+    verifyLogin,
+    loadHome
 }
