@@ -1,8 +1,9 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const nodemailer = require("nodemailer");
-const userModel = require('../models/userModel');
+// const userModel = require('../models/userModel');
 require("dotenv").config();
+const randomstring = require("randomstring");
 
 
 const securePassword = async(password)=>{
@@ -36,7 +37,43 @@ const sendVerifyMail = async(name, email, user_id)=>{
             from: process.env.USER,
             to: email,
             subject: 'For Verification Mail',
-            html: '<p>Hi, '+name+', please click here to <a href="http://127.0.0.1:3000/verify?id='+user_id+'"> Verify </a> your mail. </p>'
+            html: '<p>Hi, '+name+', please click here to <a href="http://localhost:3000/verify?id='+user_id+'"> Verify </a> your mail. </p>'
+        }
+
+        transporter.sendMail(mailOptions, function(error, info){
+            if(error){
+                console.log(error);
+            }
+            else{
+                console.log("email has been sent:- ", info.response);
+            }
+        });
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+//for reset password send mail
+const sendResetPasswordMail = async(name, email, token)=>{
+    try {
+        
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            auth:{
+                user:process.env.USER,
+                pass: process.env.PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.USER,
+            to: email,
+            subject: 'For Reset Password ',
+            html: '<p>Hi, '+name+', please click here to <a href="http://localhost:3000/forget-password?token='+token+'"> Reset </a> your password. </p>'
         }
 
         transporter.sendMail(mailOptions, function(error, info){
@@ -171,6 +208,79 @@ const userLogout = async(req, res)=>{
     }
 }
 
+//forget password code start
+const forgetLoad = async(req,res)=>{
+    try {
+        
+        res.render('forget');
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+
+const forgetVerify = async(req,res)=>{
+    try {
+
+        const email = req.body.email;
+        const UserData = await User.findOne({email:email});
+        if(UserData){
+
+            if(UserData.is_varified === 0){
+                res.render('forget', {message: "Please Verify Your Mail"});
+            }
+            else{
+                const randomString = randomstring.generate();
+                const updatedData = await User.updateOne({email:email},{$set:{token:randomString}});
+                sendResetPasswordMail(UserData.name, UserData.email, randomString);
+                res.render('forget', {message:"Please check your mail to reset your password."});
+            }
+
+        }
+        else{
+            res.render('forget', {message: "User Email is incorrect"});
+        }
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+const forgetPasswordLoad = async(req,res)=>{
+    try {
+        
+        const token = req.query.token;
+        const tokenData = await User.findOne({token:token});
+        if(tokenData){
+            res.render('forget-password', {user_id: tokenData._id});
+        }
+        else{
+            res.render('404', {message:"Token is Invalid."});
+        }
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+const resetPassword = async(req,res)=>{
+    try {
+
+        const password = req.body.password;
+        const user_id = req.body.user_id;
+
+        const secure_password = await securePassword(password);
+
+        const updated_Data = await User.findByIdAndUpdate({_id:user_id}, {$set:{password:secure_password, token:''}});
+
+        res.redirect("/");
+        
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+
 
 module.exports = {
     loadRegister,
@@ -179,5 +289,9 @@ module.exports = {
     loginLoad,
     verifyLogin,
     loadHome,
-    userLogout
+    userLogout,
+    forgetLoad,
+    forgetVerify,
+    forgetPasswordLoad,
+    resetPassword
 }
