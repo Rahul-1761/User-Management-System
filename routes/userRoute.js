@@ -76,4 +76,8 @@ user_route.get('/forget-password', auth.isLogout, userController.forgetPasswordL
 
 user_route.post('/forget-password', userController.resetPassword);
 
+user_route.get('/verification', userController.verificationLoad);
+
+user_route.post('/verification', userController.sentVerificationLink);
+
 module.exports = user_route;

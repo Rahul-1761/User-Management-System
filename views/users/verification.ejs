@@ -1,6 +1,6 @@
 <% include('../layouts/header.ejs') %>
 
-<h1>Login</h1>
+<h1>Verification</h1>
 
 <% 
 
@@ -13,17 +13,13 @@
 %>
 
 
-<form action="/login" method="post">
+<form action="/verification" method="post">
 
     <input type="email" name="email" required placeholder="Enter Email">
     <br><br>
-    <input type="password" name="password" required placeholder="Enter Password">
-    <br><br>
-    <input type="Submit" value="Login">
+    <input type="Submit" value="Send Verification Link">
 
 </form>
-<a href="/forget">Forget Password</a>
 
-<a href="/verification">Verification</a>
 
 <% include('../layouts/footer.ejs') %>
