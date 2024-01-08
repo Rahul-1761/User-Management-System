@@ -82,4 +82,8 @@ user_route.get('/verification', userController.verificationLoad);
 
 user_route.post('/verification', userController.sentVerificationLink);
 
+user_route.get('/edit', auth.isLogin, userController.editLoad);
+
+user_route.post('/edit',upload.single('image'), userController.updateprofile);
+
 module.exports = user_route;
