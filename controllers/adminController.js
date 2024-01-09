@@ -16,6 +16,8 @@ const securePassword = async(password)=>{
     }
 }
 
+
+
 //for reset password send mail
 const sendResetPasswordMail = async(name, email, token)=>{
     try {
@@ -36,6 +38,42 @@ const sendResetPasswordMail = async(name, email, token)=>{
             to: email,
             subject: 'For Reset Password ',
             html: '<p>Hi, '+name+', please click here to <a href="http://localhost:3000/admin/forget-password?token='+token+'"> Reset </a> your password. </p>'
+        }
+
+        transporter.sendMail(mailOptions, function(error, info){
+            if(error){
+                console.log(error);
+            }
+            else{
+                console.log("email has been sent:- ", info.response);
+            }
+        });
+
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+//for send mail
+const addUserMail = async(name, email, password, user_id)=>{
+    try {
+        
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            auth:{
+                user:process.env.USER,
+                pass: process.env.PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.USER,
+            to: email,
+            subject: 'Admin Added you and verify your mail',
+            html: '<p>Hi, '+name+', please click here to <a href="http://localhost:3000/verify?id='+user_id+'"> Verify </a> your mail. </p> <br><br> <b>Email:-</b>'+email+'<br><b>Password:-</b>'+password+'<br> Please Reset Your Password '
         }
 
         transporter.sendMail(mailOptions, function(error, info){
@@ -213,6 +251,55 @@ const adminDashboard = async(req,res)=>{
     }
 }
 
+// Add New User 
+
+const newUserLoad = async(req,res)=>{
+    try {
+
+        res.render('new-user');
+        
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+const addUser = async(req,res)=>{
+    try {
+
+        const name = req.body.name;
+        const email = req.body.email;
+        const mno = req.body.mno;
+        const image = req.file.filename;
+        const password = randomstring.generate(8);
+
+        const spassword = await securePassword(password);
+
+        const user = new User({
+            name:name,
+            email:email,
+            mobile:mno,
+            image:image,
+            password:spassword,
+            is_admin: 0
+        });
+
+        const userData = await user.save();
+
+        if(userData){
+            addUserMail(name,email,password,userData._id);
+            res.redirect('/admin/dashboard');
+
+        }
+        else{
+            res.render('new-user', {message:'Something Wrong'});
+        }
+
+        
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
 module.exports = {
     loadLogin,
     verifyLogin,
@@ -222,5 +309,7 @@ module.exports = {
     forgetVerify,
     forgetPasswordLoad,
     resetPassword,
-    adminDashboard
+    adminDashboard,
+    newUserLoad,
+    addUser
 }
