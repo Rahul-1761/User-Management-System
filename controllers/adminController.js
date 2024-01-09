@@ -204,7 +204,9 @@ const resetPassword = async(req,res)=>{
 const adminDashboard = async(req,res)=>{
     try {
 
-        res.render('dashboard');
+        const userData = await User.find({is_admin:0});
+
+        res.render('dashboard', {users:userData});
         
     } catch (error) {
         console.log(error.message);
