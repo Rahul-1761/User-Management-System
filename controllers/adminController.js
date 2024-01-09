@@ -55,7 +55,7 @@ const sendResetPasswordMail = async(name, email, token)=>{
 const loadLogin = async(req,res)=>{
     try {
 
-        res.render('adminLogin');
+        res.render('login');
         
     } catch (error) {
         console.log(error.message);
@@ -77,22 +77,22 @@ const verifyLogin = async(req,res)=>{
             if(passwordMatch){
 
                 if(userData.is_admin === 0){
-                    res.render('adminLogin', {message:"Email or Password is incorrect"});
+                    res.render('login', {message:"Email or Password is incorrect"});
                 }
                 else{
                     req.session.user_id = userData._id;
-                    res.redirect('/admin/adminHome');
+                    res.redirect('/admin/home');
                 }
 
             }
             else{
-                res.render('adminLogin', {message:"Email or Password is incorrect"});
+                res.render('login', {message:"Email or Password is incorrect"});
             }
 
 
         }
         else{
-            res.render('adminLogin', {message:"Email or Password is incorrect"});
+            res.render('login', {message:"Email or Password is incorrect"});
         }
         
     } catch (error) {
@@ -103,7 +103,9 @@ const verifyLogin = async(req,res)=>{
 const loadDashboard = async(req,res)=>{
     try {
 
-        res.render('adminHome');
+        const userData = await User.findById({ _id:req.session.user_id});
+
+        res.render('home',{admin:userData});
         
     } catch (error) {
         console.log(error.message);
@@ -199,6 +201,16 @@ const resetPassword = async(req,res)=>{
     }
 }
 
+const adminDashboard = async(req,res)=>{
+    try {
+
+        res.render('dashboard');
+        
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
 module.exports = {
     loadLogin,
     verifyLogin,
@@ -207,5 +219,6 @@ module.exports = {
     forgetLoad,
     forgetVerify,
     forgetPasswordLoad,
-    resetPassword
+    resetPassword,
+    adminDashboard
 }
