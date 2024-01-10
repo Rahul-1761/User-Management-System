@@ -2,7 +2,7 @@ const express = require("express");
 const user_route = express();
 const session = require("express-session");
 
-const config = require('../config/config');
+const config = require("../config/config");
 
 user_route.use(session({secret:config.SESSIONSECRET}));
 
