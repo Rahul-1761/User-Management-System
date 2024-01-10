@@ -86,4 +86,6 @@ user_route.get('/edit', auth.isLogin, userController.editLoad);
 
 user_route.post('/edit',upload.single('image'), userController.updateprofile);
 
+user_route.get('/admin', auth.isLogout);
+
 module.exports = user_route;
