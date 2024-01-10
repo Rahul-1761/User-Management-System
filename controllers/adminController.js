@@ -332,6 +332,18 @@ const updateUsers = async(req,res)=>{
     }
 }
 
+const deleteUser = async(req,res)=>{
+    try {
+
+        const id = req.query.id;
+        const userData = await User.deleteOne({ _id: id});
+        res.redirect('/admin/dashboard');
+        
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
 module.exports = {
     loadLogin,
     verifyLogin,
@@ -345,5 +357,6 @@ module.exports = {
     newUserLoad,
     addUser,
     editUserLoad,
-    updateUsers
+    updateUsers,
+    deleteUser
 }
